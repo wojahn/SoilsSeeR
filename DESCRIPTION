@@ -5,7 +5,7 @@ Version: 0.1.0
 Author: Wojahn, J.M.A.
 Maintainer: The package maintainer <mikewojahn@boisestate.edu>
 Description: R-Based Mining of the FAO-UNESCO DSMW
-License: Creative Commons Public License Attribution Non-Commercial
+License: Creative Commons Public License Attribution Non-Commercial Share Alike
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.1
