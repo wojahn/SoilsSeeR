@@ -5,7 +5,7 @@
 # Written by John M. A. Wojahn October 2022
 # This is Free and Open-Source Software (F.O.S.S.)
 # © J.M.A. Wojahn
-# Provided under the GNU Affero General Public License v. 3
+# Provided under the Creative Commons Public License Attribution Non-Commercial
 # Funded by Boise State University
 
 SoilsInfoGrabbeR <- function(DSMW, ptz)
