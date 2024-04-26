@@ -1,11 +1,11 @@
 #' SoilsSeeR Analysis Function
 #' @param DSMW character: Path to FAO-UNESCO DSMW
-#' @param ptz vector: list of lat/long points, must be Deg. Min. Sec.!
+#' @param ptz vector: list of lat/long points, must be decimal!
 #' @export
 # Written by John M. A. Wojahn October 2022
 # This is Free and Open-Source Software (F.O.S.S.)
 # © J.M.A. Wojahn
-# Provided under the Creative Commons Public License Attribution Non-Commercial
+# Provided under the GNU Affero General Public License v. 3
 # Funded by Boise State University
 
 SoilsInfoGrabbeR <- function(DSMW, ptz)
@@ -18,7 +18,8 @@ SoilsInfoGrabbeR <- function(DSMW, ptz)
   {
     stop("Error: DSMW must be character!")
   }
-  DSMW_sh <- rgdal::readOGR(DSMW, verbose = F) # read in DSMW
+  #DSMW_sh <- rgdal::readOGR(DSMW, verbose = F) # read in DSMW
+  DSMW_sh <- sf::st_read(DSMW)
   message("Extracting and cleaning sample geospatial data")
   taxa <- ptz[,1] #IDs
   GeoCoords <- ptz[,2] #lat/long
@@ -63,14 +64,17 @@ SoilsInfoGrabbeR <- function(DSMW, ptz)
   pandan.sf.point <- st_as_sf(x = GeoCoords_Expd,
                           coords = c("longitude","latitude"),
                           crs = NA)
+  pandan.st.point <- as_Spatial(pandan.sf.point)
+  DSMW_sh_st <- as_Spatial(DSMW_sh)
   # convert to sp object if needed
   message("Overlapping samples with FAO-UNESCO Digital Soils Map of the World")
   library(spatialEco)
   library(sp)
-  pts.poly <- point.in.poly(pandan.sf.point, DSMW_sh, sp = T) # extract info
+  pts.poly <- sp::over(pandan.st.point, DSMW_sh_st) # extract info
   pts_df <- as.data.frame(pts.poly) # make legible
   pts_df_old <- pts_df
   message("Checking answers for quality")
+  message("This might take a little while...")
   pb <- txtProgressBar(min = 1,      # Minimum value of the progress bar
                      max = nrow(pts_df), # Maximum value of the progress bar
                      style = 3,    # Progress bar style (also available style = 1 and style = 2)
@@ -80,13 +84,14 @@ SoilsInfoGrabbeR <- function(DSMW, ptz)
     setTxtProgressBar(pb, i)
     if(is.na(pts_df[i,2]))
     {
+      #print(i)
       DSMW_f <- as(DSMW_sh,"sf")
       near <- sf::st_nearest_feature(pandan.sf.point[i,],DSMW_f,longlat=T)
       dist <- sf::st_distance(pandan.sf.point[i,],DSMW_f[near,],by_element = T)
       #assuming 110 k to degree on average...
       if(dist < 0.0091)
       {
-        pts_df[i,2:ncol(pts_df)] <- as.data.frame(DSMW_f[near,])
+        pts_df[i,1:ncol(pts_df)] <- as.data.frame(DSMW_f[near,])
       }else{
         pts_df[i,] <- "No_Soil_Data"
       }
